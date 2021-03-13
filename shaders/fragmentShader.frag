@@ -1,3 +1,6 @@
+precision highp float;
+precision highp sampler3D;
+
 uniform sampler3D voxels;
 varying vec2 vUv;
 
@@ -18,15 +21,9 @@ varying vec2 vUv;
 }*/
 
 float getDistance(vec3 point) {
-	vec3 spherePosition = vec3(0.0, 2.0, -6.0);
-	float sphereRadius = 1.0; 
-	float sphereDistance = length(point - spherePosition) - sphereRadius;
-	if(int(point.x*100.0+50.0) < 0 || int(point.x*100.0+50.0) >= 100 || int(point.y*100.0+50.0) < 0 || int(point.y*100.0+50.0) >= 100|| int(point.z*100.0+50.0) < 0 || int(point.z*100.0+50.0) >= 100){
-		return (10.0);
-	}
-	float voxelDistance = voxels[int(point.x * 100.0 + point.y)];
+	float voxelDistance= texture(voxels, point).x;//vec3(point.x/100.0,point.y/100.0,point.z/100.0)
+	//voxelDistance = 100.0;
 	float planeDistance = point.y;
-
 	return min(planeDistance, voxelDistance);
 }
 
@@ -46,16 +43,43 @@ float raymarch(vec3 rayOrigin, vec3 rayDirection) {
 	}
 	return distanceFromOrigin;
 }
+vec3 getNormal(vec3 point) {
+	float distance = getDistance(point);
+	vec2 epsilon = vec2(.01, 0.0);
+    
+	vec3 normal = distance - 
+					vec3(getDistance(point-epsilon.xyy),
+					getDistance(point-epsilon.yxy),
+        			getDistance(point-epsilon.yyx));
+    
+    return normalize(normal);
+}
+float getLight(vec3 point) {
+	// implement
+	vec3 lightPosition = vec3(2.0, 4.0, -2.0);
+	vec3 lightToPoint = normalize(lightPosition - point);
+	vec3 normal = getNormal(point);
+	float diffuse = clamp(dot(normal, lightToPoint), 0.0, 1.0);
+	float distanceToLightOffset = raymarch(point + normal * 0.02, lightToPoint);
+	if(distanceToLightOffset < length(lightPosition - point))
+		diffuse *= 0.1;
+	
+	return diffuse;
 
+}
 void main() {
     vec3 color = vec3(0.0);
-	vec3 rayOrigin = vec3(0.0, 1.0, 3.0);
+	vec3 rayOrigin = vec3(0.0, 1.0, 1.0);
 	vec3 rayDirection = normalize(vec3(vUv.x - 0.5, vUv.y - 0.5, -1.0));
 	float distance = raymarch(rayOrigin, rayDirection);
 	vec3 point = rayOrigin + rayDirection * distance;
-	//float diffuse = getLight(point);
+	float diffuse = getLight(point);
 	//color = vec3(diffuse);
-	color = vec3(distance/10.0);
-	gl_FragColor = vec4(color, 1.0);
+	color = vec3(distance/100.0);
+	//color = vec3(1,1,1);
+	//vec4 actColour = texture(voxels, vec3(vUv.x,vUv.y,.5));
+	//color = texture(voxels, vec3(vUv.x, vUv.y, 1));
+	gl_FragColor = vec4(color,1);
+	//gl_FragColor = actColour;
 
 }
