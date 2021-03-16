@@ -38,12 +38,50 @@ vec2 getClosestPoint2D(vec2 point, vec2 startLine, vec2 endLine){
 }
 
 float getDistance(vec3 point) {
+	float planeDistance = point.y;
+	/*float points[] = float[](0.0, -6.0, 0.5, 5.0, -2.0, 0.75);
+	int connections[] = int[](0,1);
+	float possibleOutcomes[10000];
+	int outcomeIndex = 0;
+	for(int i = 0; i < connections.length()/2; i++){
+		int j = connections[2*i];
+		int k = connections[2*i+1];
+		vec2 pointA = vec2(points[j*3], points[j*3+1]);
+		vec2 pointB = vec2(points[k*3], points[k*3+1]);
+		vec2 closestFlatPoint = getClosestPoint2D(point.xz,pointA, pointB);
+		vec3 closestPoint = vec3(closestFlatPoint.x, 0.0, closestFlatPoint.y);
+		float distFromLeft = distance(closestFlatPoint, pointA)/distance(pointA, pointB);
+		float actRad = points[j*3+2] * (max(1.0 - distFromLeft, 0.0))+ points[k*3+2] * distFromLeft;
+		if(planeDistance >= 0.0 && length(point-closestPoint) >=actRad){
+			continue;
+		}
+		possibleOutcomes[outcomeIndex*3] = closestPoint.x;
+		possibleOutcomes[outcomeIndex*3+1] = closestPoint.z;
+		possibleOutcomes[outcomeIndex*3+2] = actRad;
+		outcomeIndex++;
+		//if(planeDistance > 0.0 && length(point-closestPoint) < actRad){
+		//	return max(planeDistance, actRad - distance(point, closestPoint));
+		//}
+	}
+	
+	if(outcomeIndex > 0){
+		if(outcomeIndex == 1){
+			vec3 actClosestPoint = vec3(possibleOutcomes[0], 0.0, possibleOutcomes[1]);
+			if(planeDistance > 0.0 && length(point-actClosestPoint) < possibleOutcomes[2]){
+				return max(planeDistance, possibleOutcomes[2] - distance(point, actClosestPoint));
+			}
+
+			float oppositeDistance = (possibleOutcomes[2] - abs(distance(point,actClosestPoint)));
+			return oppositeDistance;
+		}
+	}
+	
+	return(planeDistance);*/
 	vec3 spherePosition = vec3(0.0, 0.0, -6.0);
 	vec3 sphereTwo = vec3(4.0, 0.0, -2.0);
 	float sphereRadius = 1.0;
 	float radiusTwo = 2.0;
 	float sphereDistance = length(point - spherePosition)  -sphereRadius;	
-	float planeDistance = point.y;
 	vec2 closestFlatPoint = getClosestPoint2D(point.xz, spherePosition.xz, sphereTwo.xz);
 	vec3 closestPoint = vec3(closestFlatPoint.x, 0.0, closestFlatPoint.y);
 	float distFromLeft = distance(closestPoint, spherePosition)/distance(spherePosition, sphereTwo);
