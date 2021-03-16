@@ -79,7 +79,9 @@ function drawCrack(depth, theta, maxTheta, maxLength, length, branchProb, x, y, 
         let cartesianXY = polarToCartesian(randomLength, currentAngle)
         x += cartesianXY[0]
         y += cartesianXY[1]
-        append(pointsArray, [x, y])
+        let height = random(0, -2)
+        let width = -noise(x, y)
+        append(pointsArray, [x, y, width, height])
         console.log(index)
         console.log(branched)
         if(branched == true){
@@ -139,6 +141,7 @@ function drawLines(array){
 }
 
 function getPointsArray(){
+    pointsArray.flat()
     return pointsArray
 }
 
