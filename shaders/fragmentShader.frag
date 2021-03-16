@@ -1,24 +1,8 @@
 precision highp float;
 precision highp sampler3D;
 
-uniform sampler3D voxels;
 varying vec2 vUv;
 
-/*vec4 ShapeMarch(vec3 p0, vec3 d) {
-  float t = 0;
-  while (t <= maxDistToCheck) {
-    vec3 p = p0 + d * t;
-    uint shapeValue = textureLod(shape, p / voxelGridSize, 0).r;
-    if (shapeValue == 255) {
-      return textureLod(voxels, p / voxelGridSize, 0);
-    }
-    
-    vec3 deltas = (step(0, d) - fract(p)) / d;
-    t += max(mincomp(deltas) + shapeValue, epsilon);
-  }
-
-  return vec4(0);
-}*/
 
 vec2 getClosestPoint2D(vec2 point, vec2 startLine, vec2 endLine){
 	vec2 line = endLine - startLine;
