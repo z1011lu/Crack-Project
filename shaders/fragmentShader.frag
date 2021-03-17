@@ -6,11 +6,17 @@ varying vec2 vUv;
 
 vec2 getClosestPoint2D(vec2 point, vec2 startLine, vec2 endLine){
 	vec2 line = endLine - startLine;
+	if(line.x == 0.0){
+		if((point.y < startLine.y && point.y < endLine.y)|| (point.y > startLine.y && point.y > endLine.y)){
+			if (distance(point, startLine) > distance(point, endLine)){
+				return (endLine);
+			}
+				else
+			return(startLine);
+		}
+		return(vec2(endLine.x, point.y));
+	}
 	float lineSlope = line.y/line.x;
-    //get the normal vector from the line
-	vec2 normVector = vec2(-line.y, line.x);
-	//Slope of it too
-	float normSlope = normVector.y/normVector.x;
 	//Get the intersection of this vector coming from the point w/ the line
 	//Equation of actual line
 	//y = startLine.y + lineSlope(x-startLine.x)
@@ -23,7 +29,7 @@ vec2 getClosestPoint2D(vec2 point, vec2 startLine, vec2 endLine){
 	//lineSlope * lineSlope * x - lineSlope * lineSlope * startLine.x + lineSlope * startLine.y =
 	//lineSlope * point.y + point.x - x
 	//(lineSlope * lineSlope + 1) * x = point.x + point.y * lineSlope-lineSlope*lineSlope * startLine.x - lineSlope * startLine.y
-	float xIntercept = (point.x + point.y * lineSlope-lineSlope*lineSlope * startLine.x - lineSlope * startLine.y)/(lineSlope * lineSlope + 1.0);
+	float xIntercept = (point.x + point.y * lineSlope-lineSlope*(-startLine.x*lineSlope + startLine.y))/(lineSlope * lineSlope + 1.0);
 	float yIntercept = startLine.y + lineSlope * (xIntercept - startLine.x);
 	//Make sure we didn't run off the edge of the path
 	if((xIntercept < startLine.x && xIntercept < endLine.x) || (xIntercept > startLine.x && xIntercept > endLine.x) || 
@@ -39,9 +45,9 @@ vec2 getClosestPoint2D(vec2 point, vec2 startLine, vec2 endLine){
 
 float getDistance(vec3 point) {
 	float planeDistance = point.y;
-	/*float points[] = float[](0.0, -6.0, 0.5, 5.0, -2.0, 0.75);
-	int connections[] = int[](0,1);
-	float possibleOutcomes[10000];
+	float points[] = float[](-1.0, -6.0, 0.5, 2.0, -1.0, 0.75, -2.0, -4.0, 0.5, -3.0, -7.0, 0.5);
+	int connections[] = int[](0,1, 0, 2, 0, 3);
+	float possibleOutcomes[100];
 	int outcomeIndex = 0;
 	for(int i = 0; i < connections.length()/2; i++){
 		int j = connections[2*i];
@@ -55,10 +61,13 @@ float getDistance(vec3 point) {
 		if(planeDistance >= 0.0 && length(point-closestPoint) >=actRad){
 			continue;
 		}
-		possibleOutcomes[outcomeIndex*3] = closestPoint.x;
-		possibleOutcomes[outcomeIndex*3+1] = closestPoint.z;
-		possibleOutcomes[outcomeIndex*3+2] = actRad;
-		outcomeIndex++;
+		else{
+			possibleOutcomes[outcomeIndex*3] = closestPoint.x;
+			possibleOutcomes[outcomeIndex*3+1] = closestPoint.z;
+			possibleOutcomes[outcomeIndex*3+2] = actRad;
+			outcomeIndex++;
+		}
+		
 		//if(planeDistance > 0.0 && length(point-closestPoint) < actRad){
 		//	return max(planeDistance, actRad - distance(point, closestPoint));
 		//}
@@ -74,10 +83,22 @@ float getDistance(vec3 point) {
 			float oppositeDistance = (possibleOutcomes[2] - abs(distance(point,actClosestPoint)));
 			return oppositeDistance;
 		}
+		else{
+			float maxDist = planeDistance;
+			for(int i = 0; i < outcomeIndex; i++){
+				vec3 actClosestPoint = vec3(possibleOutcomes[i*3], 0.0, possibleOutcomes[i*3+1]);
+				if(planeDistance > 0.0 && length(point-actClosestPoint) < possibleOutcomes[i*3+2]){
+					maxDist = max(maxDist, possibleOutcomes[i*3+2] - distance(point, actClosestPoint));
+				}
+				float oppositeDistance = (possibleOutcomes[i*3+2] - abs(distance(point,actClosestPoint)));
+				maxDist = max(maxDist, oppositeDistance);
+			}
+			return maxDist;
+		}
 	}
 	
-	return(planeDistance);*/
-	vec3 spherePosition = vec3(0.0, 0.0, -6.0);
+	return(planeDistance);
+	/*vec3 spherePosition = vec3(0.0, 0.0, -6.0);
 	vec3 sphereTwo = vec3(4.0, 0.0, -2.0);
 	float sphereRadius = 1.0;
 	float radiusTwo = 2.0;
@@ -94,7 +115,7 @@ float getDistance(vec3 point) {
 	}
 	
 	float oppositeDistance = (actRad - abs(distance(point,closestPoint)));
-	return oppositeDistance;
+	return oppositeDistance;*/
 }
 
 
