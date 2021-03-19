@@ -3,6 +3,9 @@ precision highp sampler3D;
 
 varying vec2 vUv;
 
+uniform float points[50];
+uniform int connections[20];
+uniform int numConnections;
 
 vec2 getClosestPoint2D(vec2 point, vec2 startLine, vec2 endLine){
 	vec2 line = endLine - startLine;
@@ -43,13 +46,68 @@ vec2 getClosestPoint2D(vec2 point, vec2 startLine, vec2 endLine){
 	return(vec2(xIntercept, yIntercept));
 }
 
+float getPointOnSide(float interpValue, float depth1, float depth2, float width1, float width2, float centreDist, float pointHeight){
+	float actDepth = interpValue * depth2 + (1.0-interpValue) * depth1;
+	float actWidth = interpValue * width2 + (1.0-interpValue) * width1;
+
+	return (distance(getClosestPoint2D(vec2(0.0, 0.0), vec2(0.0, -actDepth), vec2(actWidth, 0.0)), vec2(centreDist, pointHeight)));
+}
+
 float getDistance(vec3 point) {
-	float planeDistance = point.y;
-	float points[] = float[](-1.0, -6.0, 0.5, 2.0, -1.0, 0.75, -2.0, -4.0, 0.5, -3.0, -7.0, 0.5);
-	int connections[] = int[](0,1, 0, 2, 0, 3);
+	/*float planeDistance = point.y;
+	float points[] = float[](0.0, -1.0, 1.0,7.0,0.0, -6.0, 1.0, 8.0, -2.0, -4.0, 0.5,2.0, -3.0, -7.0, 0.5, 3.0);
+	int connections[] = int[](0,1);
 	float possibleOutcomes[100];
 	int outcomeIndex = 0;
 	for(int i = 0; i < connections.length()/2; i++){
+		int j = connections[2*i];
+		int k = connections[2*i+1];
+		vec2 pointA = vec2(points[j*4], points[j*4+1]);
+		vec2 pointB = vec2(points[k*4], points[k*4+1]);
+		vec2 closestFlatPoint = getClosestPoint2D(point.xz,pointA, pointB);
+		vec3 closestPoint = vec3(closestFlatPoint.x, 0.0, closestFlatPoint.y);
+		float distFromLeft = distance(closestFlatPoint, pointA)/distance(pointA, pointB);
+		float sideDist = getPointOnSide(distFromLeft, points[j*4+3], points[k*4+3], points[j*4+2], points[k*4+2], distance(point.xz, closestFlatPoint), point.y);
+		
+		//float actRad = points[j*4+2] * (max(1.0 - distFromLeft, 0.0))+ points[k*4+2] * distFromLeft;
+		if(planeDistance >= 0.0 && length(point-closestPoint) >=sideDist){
+			continue;
+		}
+		else{
+			possibleOutcomes[outcomeIndex*3] = closestPoint.x;
+			possibleOutcomes[outcomeIndex*3+1] = closestPoint.z;
+			possibleOutcomes[outcomeIndex*3+2] = sideDist;
+			outcomeIndex++;
+		}
+		
+		//if(planeDistance > 0.0 && length(point-closestPoint) < actRad){
+		//	return max(planeDistance, actRad - distance(point, closestPoint));
+		//}
+	}
+	
+	if(outcomeIndex > 0){
+		float maxDist = planeDistance;
+		for(int i = 0; i < outcomeIndex; i++){
+			vec3 actClosestPoint = vec3(possibleOutcomes[i*3], 0.0, possibleOutcomes[i*3+1]);
+			if(planeDistance > 0.0){
+				maxDist = max(maxDist, possibleOutcomes[i*3+2] - distance(point, actClosestPoint));
+			}
+			else{
+				float oppositeDistance = (possibleOutcomes[i*3+2] - abs(distance(point,actClosestPoint)));
+				maxDist = max(maxDist, oppositeDistance);
+			}
+			
+		}
+		return maxDist;
+	}
+	
+	return(planeDistance);*/
+	float planeDistance = point.y;
+	//float points[] = float[](-1.0, -6.0, 0.5, 2.0, -1.0, 0.75, -2.0, -4.0, 0.5, -3.0, -7.0, 0.5);
+	//int connections[] = int[](0,1);
+	float possibleOutcomes[100];
+	int outcomeIndex = 0;
+	for(int i = 0; i < numConnections; i++){
 		int j = connections[2*i];
 		int k = connections[2*i+1];
 		vec2 pointA = vec2(points[j*3], points[j*3+1]);
@@ -76,22 +134,13 @@ float getDistance(vec3 point) {
 	if(outcomeIndex > 0){
 		if(outcomeIndex == 1){
 			vec3 actClosestPoint = vec3(possibleOutcomes[0], 0.0, possibleOutcomes[1]);
-			if(planeDistance > 0.0 && length(point-actClosestPoint) < possibleOutcomes[2]){
-				return max(planeDistance, possibleOutcomes[2] - distance(point, actClosestPoint));
-			}
-
-			float oppositeDistance = (possibleOutcomes[2] - abs(distance(point,actClosestPoint)));
-			return oppositeDistance;
+			return max(planeDistance, possibleOutcomes[2] - distance(point, actClosestPoint));
 		}
 		else{
 			float maxDist = planeDistance;
 			for(int i = 0; i < outcomeIndex; i++){
 				vec3 actClosestPoint = vec3(possibleOutcomes[i*3], 0.0, possibleOutcomes[i*3+1]);
-				if(planeDistance > 0.0 && length(point-actClosestPoint) < possibleOutcomes[i*3+2]){
-					maxDist = max(maxDist, possibleOutcomes[i*3+2] - distance(point, actClosestPoint));
-				}
-				float oppositeDistance = (possibleOutcomes[i*3+2] - abs(distance(point,actClosestPoint)));
-				maxDist = max(maxDist, oppositeDistance);
+				maxDist = max(maxDist, possibleOutcomes[i*3+2] - distance(point, actClosestPoint));
 			}
 			return maxDist;
 		}
