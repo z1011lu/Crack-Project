@@ -4,7 +4,7 @@ precision highp sampler3D;
 varying vec2 vUv;
 
 uniform float points[50];
-uniform int connections[20];
+uniform int connections[40];
 uniform int numConnections;
 
 vec2 getClosestPoint2D(vec2 point, vec2 startLine, vec2 endLine){

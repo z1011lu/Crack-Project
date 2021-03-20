@@ -86,13 +86,16 @@ drawCrack(3, 70, 60, 1000, 100, .07, 0, 0, 0)
 let flatPointsArray = getPointsArray().flat();
 let actPointsArray = []
 for(let i = 0; i < flatPointsArray.length/4; i++){
-    //Both x and y need to be scaled significantly
-    actPointsArray.push(flatPointsArray[i*4]/50-0.5)
     //Y also need to be negated (will become z)
-    actPointsArray.push(-flatPointsArray[i*4+1]/50-1.0)
+    actPointsArray.push(flatPointsArray[i*4+1]/5)
+    //Both x and y need to be scaled significantly
+    actPointsArray.push(-flatPointsArray[i*4]/50-1.0)
+    
     //And we only need the depth now, so will average depth/height
-    actPointsArray.push((flatPointsArray[i*4+2] + flatPointsArray[i*4+3])/10)
+    actPointsArray.push((flatPointsArray[i*4+2] + flatPointsArray[i*4+3])/1000+0.05)
+    //actPointsArray.push(0.04)
 }
+console.log(actPointsArray)
 console.log(getIndexBuffer())
 //Initialise 
 
@@ -100,7 +103,7 @@ function addShaderCube() {
 	if(count == 2) {
           geometry1 = new THREE.BoxGeometry(2, 1, 1);
         var tempPointsArray = actPointsArray.slice(0, 50)
-        var tempConnections = indexBuffer.flat().slice(0,20)
+        var tempConnections = indexBuffer.flat().slice(0,40)
         var uniforms = {points: {type:"fv", value:tempPointsArray},
                         connections: {type: "fv", value: tempConnections},
                         numConnections: {type: "int", value: 5}};
@@ -167,4 +170,4 @@ function animate() {
     //light.position.x += delta;
 
 }
-animate();
+//animate();
